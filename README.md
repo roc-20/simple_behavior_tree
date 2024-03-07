@@ -147,7 +147,6 @@ use simple_behavior_tree::{BTNode, BTStatus};
 fn is_player_in_range() -> BTStatus {
     // Here, you would have logic to determine if the player is in range
     println!("Checking if player is in range...");
-    // This is a placeholder result
     BTStatus::Success // or BTStatus::Failure based on your condition
 }
 
