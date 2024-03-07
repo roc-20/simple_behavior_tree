@@ -21,9 +21,8 @@ Add `simple_behavior_tree` to your project's `Cargo.toml`:
 
 ```toml
 [dependencies]
-simple_behavior_tree = "0.1.1"
+simple_behavior_tree = "0.1.2"
 ```
-
 
 ### Basic Usage
 
