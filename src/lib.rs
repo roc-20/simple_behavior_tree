@@ -4,6 +4,7 @@ pub enum BTNode {
 
     Parallel(ParallelMode, Vec<BTNode>),
     Action(fn() -> BTStatus),
+    Condition(fn() -> BTStatus),
 }
 
 
@@ -62,6 +63,8 @@ impl BTNode {
             }
 
             BTNode::Action(action) => action(),
+
+            BTNode::Condition(condition) => condition(),
 
             // BTNode::Parallel(mode, _) => self.tick_parallel(mode),
             BTNode::Parallel(_, _) => self.tick_parallel(),

@@ -1,45 +1,31 @@
-use simple_behavior_tree::{BTStatus, ParallelMode, BTNode};
+use simple_behavior_tree::{BTNode, BTStatus};
+
+// Condition function
+fn is_player_in_range() -> BTStatus {
+    // Here, you would have logic to determine if the player is in range
+    println!("Checking if player is in range...");
+    // This is a placeholder result
+    BTStatus::Success // or BTStatus::Failure based on your condition
+}
+
+// Action function
+fn attack_player() -> BTStatus {
+    println!("Attacking player!");
+    BTStatus::Success // or BTStatus::Failure based on the action outcome
+}
 
 fn main() {
-    let action_success = || {
-        println!("Action success executed");
-        BTStatus::Success
-    };
+    // Create a sequence node with a condition and an action
+    let mut bt = BTNode::Sequence(vec![
+        BTNode::Condition(is_player_in_range),
+        BTNode::Action(attack_player),
+    ]);
 
-    let action_failure = || {
-        println!("Action failure executed");
-        BTStatus::Failure
-    };
-
-    // 测试 AnySuccess 模式
-    let mut bt_any_success = BTNode::Parallel(
-        ParallelMode::AnySuccess,
-        vec![
-            BTNode::Action(action_success),
-            BTNode::Action(action_failure),
-        ]
-    );
-
-    println!("Testing AnySuccess Mode:");
-    match bt_any_success.tick() {
-        BTStatus::Success => println!("BT AnySuccess succeeded"),
-        BTStatus::Failure => println!("BT AnySuccess failed"),
-        BTStatus::Running => println!("BT AnySuccess is still running"),
-    }
-
-    // 测试 AllSuccess 模式
-    let mut bt_all_success = BTNode::Parallel(
-        ParallelMode::AllSuccess,
-        vec![
-            BTNode::Action(action_success),
-            BTNode::Action(action_failure),
-        ]
-    );
-
-    println!("\nTesting AllSuccess Mode:");
-    match bt_all_success.tick() {
-        BTStatus::Success => println!("BT AllSuccess succeeded"),
-        BTStatus::Failure => println!("BT AllSuccess failed"),
-        BTStatus::Running => println!("BT AllSuccess is still running"),
+    // Execute the behavior tree
+    println!("Executing Behavior Tree:");
+    match bt.tick() {
+        BTStatus::Success => println!("Behavior Tree succeeded."),
+        BTStatus::Failure => println!("Behavior Tree failed."),
+        BTStatus::Running => println!("Behavior Tree is still running."),
     }
 }
