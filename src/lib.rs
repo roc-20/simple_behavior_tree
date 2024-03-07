@@ -64,43 +64,36 @@ impl BTNode {
             BTNode::Action(action) => action(),
 
             // BTNode::Parallel(mode, _) => self.tick_parallel(mode),
-            BTNode::Parallel(mode, _) => {
-                // let mode_copy = mode.clone();
-                // self.tick_parallel(&mode_copy);
-
-                match mode {
-                    ParallelMode::AllSuccess => self.tick_parallel(&ParallelMode::AllSuccess),
-                    ParallelMode::AnySuccess => self.tick_parallel(&ParallelMode::AnySuccess),
-                }
-            },
+            BTNode::Parallel(_, _) => self.tick_parallel(),
+            
         }
     }
 
 
-    fn tick_parallel(&mut self, mode: &ParallelMode) -> BTStatus {
-        if let BTNode::Parallel(_, nodes) = self {
-            let mut all_success = true;
-            for node in nodes {
+    fn tick_parallel(&mut self) -> BTStatus {
+        if let BTNode::Parallel(mode, nodes) = self {
+            let mut success_count = 0;
+            let mut failure_count = 0;
+
+            for node in nodes.iter_mut() {
                 match node.tick() {
-                    // 并行模式:全部成功模式, 有一个失败则失败
-                    BTStatus::Failure if *mode == ParallelMode::AllSuccess => return BTStatus::Failure,
-                    // 并行模式:任意成功模式, 有一个成功则成功
-                    BTStatus::Success if *mode == ParallelMode::AnySuccess => return BTStatus::Success,
-                    
-                    // 有一个失败，标记全部成功为 false 
-                    BTStatus::Failure => all_success = false,
-                    _ => {}
+                    BTStatus::Success => success_count += 1,
+                    BTStatus::Failure => failure_count += 1,
+                    BTStatus::Running => return BTStatus::Running,
                 }
             }
 
-            match all_success {
-                true => BTStatus::Success,
-                false => BTStatus::Failure,
+            match mode {
+                ParallelMode::AllSuccess if success_count == nodes.len() => BTStatus::Success,
+                ParallelMode::AnySuccess if success_count > 0 => BTStatus::Success,
+                _ if failure_count > 0 => BTStatus::Failure,
+                _ => BTStatus::Running,
             }
         } else {
-            BTStatus::Failure  // 非并行节点类型，异常情况 
+            // 如果不是Parallel节点类型，这是个编码逻辑错误
+            panic!("tick_parallel called on a non-parallel node!");
         }
     }
-
+    
 }
 
